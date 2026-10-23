@@ -1,0 +1,18 @@
+[versions]
+kroxylicious = "0.25.0"
+kafka = "4.3.1"
+awssdk = "2.33.0"
+junit = "6.0.1"
+
+[libraries]
+kroxylicious-bom = { module = "io.kroxylicious:kroxylicious-bom", version.ref = "kroxylicious" }
+kroxylicious-api = { module = "io.kroxylicious:kroxylicious-api" }
+kroxylicious-runtime = { module = "io.kroxylicious:kroxylicious-runtime" }
+kroxylicious-filter-test-support = { module = "io.kroxylicious:kroxylicious-filter-test-support" }
+kroxylicious-integration-test-support = { module = "io.kroxylicious:kroxylicious-integration-test-support" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka" }
+awssdk-bom = { module = "software.amazon.awssdk:bom", version.ref = "awssdk" }
+awssdk-s3 = { module = "software.amazon.awssdk:s3" }
+awssdk-url-connection-client = { module = "software.amazon.awssdk:url-connection-client" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
