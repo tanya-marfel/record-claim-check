@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(platform(libs.kroxylicious.bom))
+    implementation(platform(libs.kroxylicious.bom))
     compileOnly(libs.kroxylicious.api)
     compileOnly(libs.kafka.clients)
 
@@ -15,7 +15,6 @@ dependencies {
     implementation(libs.awssdk.s3)
     implementation(libs.awssdk.url.connection.client)
 
-    testImplementation(platform(libs.kroxylicious.bom))
     testImplementation(libs.kroxylicious.filter.test.support)
     testImplementation(libs.kroxylicious.integration.test.support)
     testRuntimeOnly(libs.kroxylicious.runtime)
