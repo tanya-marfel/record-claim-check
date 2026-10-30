@@ -56,6 +56,8 @@ Keep changes focused and include tests for new behavior and bug fixes. Run `./gr
 
 See [AGENTS.md](AGENTS.md) for repository conventions, testing requirements, and security guidelines. Never commit credentials or record payloads containing sensitive data.
 
+Pull requests use the [PR template](.github/pull_request_template.md). Describe the change, report validation results, and note any compatibility or operational impact. GitHub inserts the template into the web form once it is on the default branch; the author fills in the details. When asking Cursor to create a PR, the instructions in `AGENTS.md` direct it to fill the template from the branch diff and observed check results.
+
 ## License
 
 Licensed under the [Apache License, Version 2.0](LICENSE).

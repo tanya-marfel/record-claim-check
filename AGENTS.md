@@ -26,7 +26,21 @@ When creating commits, use the Conventional Commits format:
 - Mark breaking changes with `!` before the colon or a `BREAKING CHANGE:` footer. Explain the impact and required migration in the commit body or footer.
 - Keep each commit focused on one logical change. Include its implementation, relevant tests, and documentation together.
 - Use the same format for pull request titles when they will become squash commit messages.
-- These conventions do not authorize committing or pushing changes unless the task calls for it.
+- After completing a requested change and passing the required checks, create a Conventional Commit containing only that task's changes, unless the user explicitly asks to leave them uncommitted. Do not wait for a separate request to commit.
+- Stage specific files or hunks and inspect the staged diff before committing. Preserve unrelated changes, including changes already staged by the user.
+- If required checks fail or cannot run, report the blocker and leave the changes uncommitted rather than bypassing checks. Documentation-only changes require the checks described below, not a full build.
+- Report the commit hash and validation results in the handoff. Push only when explicitly requested.
+
+## Pull requests
+
+- When asked to create or update a pull request, read `.github/pull_request_template.md` and use its headings for the description. Fill each section with actual details and remove the instructional comments.
+- Inspect the complete branch diff against the intended PR base and the commits included in the PR. Describe the final change, not just the most recent commit or the conversation history. Do not describe uncommitted changes as part of the PR.
+- Use a Conventional Commit title that describes the final scope. Keep the summary concise and explain the problem and resulting behavior before implementation details.
+- Populate Validation with the commands actually run and their observed results for the proposed changes. Distinguish passing tests from skipped tasks or `NO-SOURCE`, and disclose checks that were not run and why. Do not invent coverage or reuse stale validation results.
+- Describe relevant compatibility and operational changes, including configuration, reference formats, dependencies, permissions, and retention. Include migration instructions for breaking changes; use `No impact` when the section does not apply.
+- Link issues only when their relationship to the change is established. Use closing keywords only when the PR resolves the issue.
+- When creating a PR through a CLI or API, supply the completed title and body explicitly. For GitHub CLI, write the body to a temporary Markdown file and use `gh pr create --title ... --body-file ...`; `--fill` alone does not satisfy this workflow.
+- After creating or updating the PR, inspect the saved title, body, base branch, and head branch to confirm they match the intended change. Preserve human-authored content when updating an existing description.
 
 ## Tests and verification
 
