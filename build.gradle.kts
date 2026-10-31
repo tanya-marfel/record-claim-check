@@ -2,6 +2,8 @@ plugins {
     `java-library`
 }
 
+group = "io.github.tm"
+
 repositories {
     mavenCentral()
 }
@@ -10,9 +12,11 @@ dependencies {
     implementation(platform(libs.kroxylicious.bom))
     compileOnly(libs.kroxylicious.api)
     compileOnly(libs.kafka.clients)
+    compileOnly(libs.kroxylicious.kafka.message.tools)
 
     implementation(platform(libs.awssdk.bom))
     implementation(libs.awssdk.s3)
+    implementation(libs.awssdk.sts)
     implementation(libs.awssdk.url.connection.client)
 
     testImplementation(libs.kroxylicious.filter.test.support)
