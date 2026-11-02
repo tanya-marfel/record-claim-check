@@ -13,6 +13,8 @@ kroxylicious-integration-test-support = { module = "io.kroxylicious:kroxylicious
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka" }
 awssdk-bom = { module = "software.amazon.awssdk:bom", version.ref = "awssdk" }
 awssdk-s3 = { module = "software.amazon.awssdk:s3" }
+awssdk-sts = { module = "software.amazon.awssdk:sts" }
 awssdk-url-connection-client = { module = "software.amazon.awssdk:url-connection-client" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
+kroxylicious-kafka-message-tools = { module = "io.kroxylicious:kroxylicious-kafka-message-tools" }
