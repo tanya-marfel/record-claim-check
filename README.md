@@ -4,9 +4,7 @@ A claim check filter for Apache Kafka® built with Kroxylicious. The goal is to 
 
 ## Status
 
-The project is in early development. The repository contains the Gradle build and dependencies for Kroxylicious, the AWS SDK for Java, and JUnit. The filter implementation and tests have not been added yet.
-
-Configuration, deployment instructions, and compatibility guarantees will be documented as the implementation takes shape.
+The project is in early development. A first filter implementation is present. Its target behavior is defined in [docs/filter.md](docs/filter.md). Tests have not been added yet.
 
 ## Intended behavior
 
@@ -18,7 +16,7 @@ The filter will run in a Kroxylicious proxy between Kafka clients and brokers:
 
 Producers and consumers will connect through the proxy. Offloading and restoration are intended to require no changes to application code or serializers.
 
-The reference format, offload threshold, failure handling, and object retention policy are still to be defined.
+The reference format, offload threshold, failure handling, and object retention policy are defined in [docs/filter.md](docs/filter.md).
 
 ## Development
 
