@@ -17,3 +17,7 @@ The filter does not delete objects. Operators set S3 lifecycle expiration to at 
 ## Consequences
 
 Objects can outlive the Kafka record. Replays and lagging consumers can still restore the value until the lifecycle rule expires the object. Expiration shorter than topic retention makes fetches fail for records that are still in the log.
+
+## Amendment 2026-11-04
+
+Apply the lifecycle rule to the configured `keyPrefix` when one is set, so other objects in the same bucket are not expired. Bucket default encryption and versioning are operator concerns; the filter does not delete, overwrite-delete, or encrypt objects itself. Content-addressed keys already overwrite an identical value in place.

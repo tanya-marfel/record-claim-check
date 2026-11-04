@@ -28,3 +28,6 @@ replay_pid*.log
 # Operating system metadata
 .DS_Store
 Thumbs.db
+
+# Local implementation plan
+/plan.md

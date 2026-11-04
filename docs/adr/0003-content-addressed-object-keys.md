@@ -17,3 +17,7 @@ Include the topic and the hex SHA-256 of the original value in the object key. A
 ## Consequences
 
 Identical values on one topic share one object. The proxy does not need the assigned offset to build the key. Two different values do not overwrite each other.
+
+## Amendment 2026-11-04
+
+The object key is `{keyPrefix}{topic}/{sha256hex}`. `keyPrefix` is optional filter configuration and defaults to empty. `{sha256hex}` is the lowercase hex SHA-256 of the original value, 64 characters. A date or UUID must not appear in the key: both create a new object on retry.
