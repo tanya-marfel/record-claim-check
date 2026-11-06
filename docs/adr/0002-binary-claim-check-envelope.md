@@ -17,3 +17,7 @@ Store a big-endian envelope that starts with the magic bytes `KRC1`, followed by
 ## Consequences
 
 A normal payload is not downloaded from S3. A damaged envelope is not delivered as the record value. Changing the layout later requires a new version byte.
+
+## Amendment 2026-11-04
+
+After a successful download, compare the object length and SHA-256 with the envelope. A mismatch fails the fetch. The size and digest exist so a truncated, substituted, or corrupted object cannot be returned as the original value.

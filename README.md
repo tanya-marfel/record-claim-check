@@ -4,19 +4,23 @@ A claim check filter for Apache Kafka® built with Kroxylicious. The goal is to 
 
 ## Status
 
-The project is in early development. A first filter implementation is present. Its target behavior is defined in [docs/filter.md](docs/filter.md). Tests have not been added yet.
+The project is in early development. A produce and fetch prototype is present. It still stores `s3://` URLs, uses date-and-UUID object keys, rewrites records with a flattening `MemoryRecordsBuilder`, and has no tests. That behavior is not what will ship.
+
+Target behavior is defined in [docs/filter.md](docs/filter.md). Accepted decisions are in [docs/adr](docs/adr). Until the prototype is replaced, `./gradlew check` only compiles the current sources.
 
 ## Intended behavior
 
 The filter will run in a Kroxylicious proxy between Kafka clients and brokers:
 
-1. On produce, store a large record value in S3 and replace it with a reference to the stored object.
-2. Write the record containing that reference to Kafka.
-3. On fetch, retrieve the object from S3 and replace the reference with the original value before returning the record to the consumer.
+1. On produce, store a record value larger than `thresholdBytes` in S3 and replace it with a binary envelope.
+2. Write the record containing that envelope to Kafka. Keys, headers, timestamps, tombstones, and producer fields stay on the record.
+3. On fetch, retrieve the object from S3, check it against the envelope, and replace the envelope with the original value before returning the record to the consumer.
 
-Producers and consumers will connect through the proxy. Offloading and restoration are intended to require no changes to application code or serializers.
+Producers and consumers will connect through the proxy. Offloading and restoration are intended to require no changes to application code or serializers. A client that reads the broker directly sees envelopes.
 
-The reference format, offload threshold, failure handling, and object retention policy are defined in [docs/filter.md](docs/filter.md).
+A failed upload fails the produce. A failed download fails the fetch. The filter does not delete objects; S3 lifecycle expiration must cover topic retention.
+
+The envelope layout, object key format, storage bounds, failure codes, and configuration are defined in [docs/filter.md](docs/filter.md).
 
 ## Development
 

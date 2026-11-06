@@ -17,3 +17,7 @@ Offload a record value only when its size is greater than `thresholdBytes`. Leav
 ## Consequences
 
 Consumers that use the proxy see the original record metadata. The broker stores an envelope in place of a large value. Values at or below the threshold, including empty values, are unchanged.
+
+## Amendment 2026-11-04
+
+Control batches and transaction markers are not offloaded. A rewrite must keep each record in its original batch and copy headers, timestamps, compression type, and producer id, epoch, and base sequence. Flattening every record into one new batch is not acceptable: it drops headers and transactional fields and can break idempotent producers.
