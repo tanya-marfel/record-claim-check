@@ -21,3 +21,11 @@ Filter methods must not block. Return an incomplete `CompletionStage` while an u
 ## Consequences
 
 Connections share one client and one credential provider. Proxy shutdown releases those resources. Tests can inject a store that succeeds or fails without S3. A slow object store pauses the affected connection until the stage completes or times out, instead of blocking the event loop.
+
+## Amendment 2026-11-07
+
+Storage is chosen per topic. Add a `StorageResolver` that returns a target from the current mapping snapshot ([ADR 0008](0008-team-owned-storage-mappings.md)): bucket, region, role ARN, external ID, key prefix, and threshold. Filter methods only read that in-memory snapshot. `ObjectStore` operations take the resolved target.
+
+The factory still creates the shared components once and closes them. Create the store for a target on first use, keep stores in a size-bounded cache, and close evicted ones. `FilterFactory.close` closes every store and credentials provider. When a reload removes a mapping, close its store after in-flight operations finish.
+
+The default credential chain is used only to assume mapping roles ([ADR 0009](0009-assume-one-role-per-storage-mapping.md)). The in-memory store used in tests keys objects by bucket and object key, so tests can cover more than one target.

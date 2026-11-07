@@ -19,3 +19,9 @@ Reject a key that is empty, contains `..`, starts with `/`, is not valid UTF-8, 
 ## Consequences
 
 A consumer of topic A cannot restore an object stored under topic B, even when both topics share a bucket. A crafted envelope cannot steer the proxy at another bucket or host. Operators can share one bucket across topics if each topic's keys stay under `{keyPrefix}{topic}/`.
+
+## Amendment 2026-11-07
+
+Bucket, region, role, and key prefix come only from a storage mapping ([ADR 0008](0008-team-owned-storage-mappings.md)). "Configured storage" now means the mappings registered for the proxy, not a single filter-wide bucket.
+
+The record supplies only its storage ID. The ID must name a mapping that covers the topic being read. An `active` or a `readOnly` mapping qualifies. The object key is derived from the mapping, the topic, and the digest, so the proxy accepts no key from a record and the key rejection rules above no longer apply. Ignoring any bucket, endpoint, or URL in a record value still applies.
