@@ -4,7 +4,7 @@ A claim check filter for Apache Kafka® built with Kroxylicious. The goal is to 
 
 ## Status
 
-The project is in early development. A produce and fetch prototype is present. It still stores `s3://` URLs, uses date-and-UUID object keys, rewrites records with a flattening `MemoryRecordsBuilder`, and has no tests. That behavior is not what will ship.
+The project is in early development. A produce and fetch prototype is present. It still stores `s3://` URLs, uses date-and-UUID object keys, sends every topic to one global bucket, rewrites records with a flattening `MemoryRecordsBuilder`, and has no tests. That behavior is not what will ship.
 
 Target behavior is defined in [docs/filter.md](docs/filter.md). Accepted decisions are in [docs/adr](docs/adr). Until the prototype is replaced, `./gradlew check` only compiles the current sources.
 
@@ -12,15 +12,17 @@ Target behavior is defined in [docs/filter.md](docs/filter.md). Accepted decisio
 
 The filter will run in a Kroxylicious proxy between Kafka clients and brokers:
 
-1. On produce, store a record value larger than `thresholdBytes` in S3 and replace it with a binary envelope.
+1. On produce, store a record value larger than the topic's threshold in the bucket its team registered, and replace it with a binary envelope.
 2. Write the record containing that envelope to Kafka. Keys, headers, timestamps, tombstones, and producer fields stay on the record.
 3. On fetch, retrieve the object from S3, check it against the envelope, and replace the envelope with the original value before returning the record to the consumer.
 
 Producers and consumers will connect through the proxy. Offloading and restoration are intended to require no changes to application code or serializers. A client that reads the broker directly sees envelopes.
 
+Teams own topics. A team that expects large payloads registers a storage mapping for its topics: a bucket and the IAM role the proxy assumes to reach it. Topics without a mapping are not offloaded, and topics with small messages do not need the proxy.
+
 A failed upload fails the produce. A failed download fails the fetch. The filter does not delete objects; S3 lifecycle expiration must cover topic retention.
 
-The envelope layout, object key format, storage bounds, failure codes, and configuration are defined in [docs/filter.md](docs/filter.md).
+The storage mapping, envelope layout, object key format, failure codes, and configuration are defined in [docs/filter.md](docs/filter.md).
 
 ## Development
 
