@@ -45,3 +45,7 @@ Teams register storage for their own topics without a change to the proxy's own 
 Deleting or editing a mapping can make existing records unreadable. `bucketName`, `region`, `roleArn`, and `keyPrefix` of a mapping that has been used must not change. Create a new mapping instead.
 
 A mapping registered in error for a topic that already carries large values does not change records already written. A topic that has no mapping and receives a large value passes it to the broker, which applies its own size limit.
+
+## Amendment 2026-11-08
+
+`MappingSource` is a plugin interface, selected and configured in the filter configuration ([ADR 0010](0010-pluggable-mapping-source-and-object-store.md)). The file source takes its path from its own configuration. Nothing in the filter depends on Kubernetes: a source that reads Kubernetes resources is a separate implementation. The ownership rule, the one-active-mapping rule, and mapping validation stay in the filter and apply to every source.

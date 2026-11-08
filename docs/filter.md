@@ -58,7 +58,7 @@ Rules:
 - If two `active` mappings cover one topic, produce to that topic fails until the conflict is removed.
 - A topic with no mapping is not offloaded. Produce passes it through unchanged.
 
-The filter reads mappings through a `MappingSource`. The first implementation reads a mounted YAML file that contains a list of these resources. A Kubernetes watcher, or a controller that writes the file, can replace it later without changing the filter. The proxy keeps an immutable snapshot and swaps it atomically on reload. Filter methods read only the snapshot. If the source cannot be read at startup, the proxy fails to start. If a reload fails, the proxy keeps the last good snapshot and reports the failure.
+The filter reads mappings through a `MappingSource` plugin ([ADR 0010](adr/0010-pluggable-mapping-source-and-object-store.md)). The `FileMappingSource` that ships with the filter reads a mounted YAML file that contains a list of these resources. A source that reads Kubernetes resources, or a controller that writes the file, can replace it without changing the filter, and the filter has no Kubernetes dependency. The ownership, uniqueness, and validation rules apply to every source. The proxy keeps an immutable snapshot and swaps it atomically on reload. Filter methods read only the snapshot. If the source cannot be read at startup, the proxy fails to start. If a reload fails, the proxy keeps the last good snapshot and reports the failure.
 
 ## What is offloaded
 
@@ -136,16 +136,44 @@ Offloaded values have the same confidentiality requirements as Kafka values. Use
 
 ## Configuration
 
-Proxy-wide settings are part of the filter configuration. Bucket, region, and role are not: they belong to mappings.
+Proxy-wide settings are part of the filter configuration. Bucket, region, and role are not: they belong to mappings. The mapping source and the object store are plugins. Each is named in the filter configuration and has its own configuration block ([ADR 0010](adr/0010-pluggable-mapping-source-and-object-store.md)).
+
+```yaml
+config:
+  mappingSource: FileMappingSource
+  mappingSourceConfig:
+    path: /etc/claim-check/mappings.yaml
+  objectStore: S3ObjectStore
+  objectStoreConfig: {}
+  topicOwnership: []   # list of namespace and topics patterns
+```
 
 | Field | Required | Default | Purpose |
 | --- | --- | --- | --- |
-| `mappingFile` | yes | | Path of the mounted file that lists storage mappings |
+| `mappingSource` | yes | | Name of the `MappingSource` implementation, for example `FileMappingSource` |
+| `mappingSourceConfig` | per source | | Configuration of that implementation |
+| `objectStore` | yes | | Name of the `ObjectStore` implementation, for example `S3ObjectStore` |
+| `objectStoreConfig` | per store | | Configuration of that implementation |
 | `topicOwnership` | yes | | List of `namespace` and `topics` patterns that say which topics each namespace may register |
 | `thresholdBytes` | no | `1048576` | Threshold for mappings that do not set their own |
 | `maxValueBytes` | no | `16777216` | Reject values larger than this (16 MiB). A mapping cannot raise it |
+
+An unknown implementation name fails proxy startup and lists the known names.
+
+`FileMappingSource` settings:
+
+| Field | Required | Default | Purpose |
+| --- | --- | --- | --- |
+| `path` | yes | | Path of the mounted file that lists storage mappings |
+
+`S3ObjectStore` settings:
+
+| Field | Required | Default | Purpose |
+| --- | --- | --- | --- |
 | `endpointOverride` | no | | HTTP(S) endpoint for MinIO or LocalStack. Test and development only |
 | `pathStyleAccess` | no | `false` | Path-style addressing for that endpoint. Test and development only |
+
+The envelope, object keys, ownership rule, error codes, size limits, and the rule that the filter never deletes are fixed by the filter. No implementation can change them. A store reports failures as not found, access denied, throttled or unavailable, timeout, or other, and the filter chooses the error code ([ADR 0004](adr/0004-fail-closed-on-storage-errors.md)).
 
 Mapping fields:
 
@@ -160,7 +188,7 @@ Mapping fields:
 | `thresholdBytes` | no | filter-wide value | Offload values strictly larger than this |
 | `state` | no | `active` | `active` or `readOnly` |
 
-Invalid configuration fails proxy startup: a missing or unreadable `mappingFile`, `thresholdBytes <= 0`, or `maxValueBytes < thresholdBytes`. A mapping that is invalid is rejected and reported, and it does not stop other mappings from loading. A mapping is invalid when `bucketName`, `region`, or `roleArn` is blank or malformed, or when its `topics` are empty. `roleArn` must look like `arn:aws:iam::{12-digit account}:role/{path and name}`.
+Invalid configuration fails proxy startup: an unknown plugin name, a missing or unreadable mapping file, `thresholdBytes <= 0`, or `maxValueBytes < thresholdBytes`. A mapping that is invalid is rejected and reported, and it does not stop other mappings from loading. A mapping is invalid when `bucketName`, `region`, or `roleArn` is blank or malformed, or when its `topics` are empty. `roleArn` must look like `arn:aws:iam::{12-digit account}:role/{path and name}`.
 
 The proxy assumes each mapping's role using its own identity from the default AWS credential chain or a workload identity. It does not use its own identity for team buckets. Production S3 connections require TLS with certificate verification. `endpointOverride` may use HTTP only in test and development configuration.
 
@@ -243,3 +271,4 @@ Clients that bypass the proxy see envelopes. Point every producer and consumer t
 - [Shared non-blocking object store](adr/0007-shared-nonblocking-object-store.md)
 - [Team-owned storage mappings](adr/0008-team-owned-storage-mappings.md)
 - [Assume one role per storage mapping](adr/0009-assume-one-role-per-storage-mapping.md)
+- [Pluggable mapping source and object store](adr/0010-pluggable-mapping-source-and-object-store.md)
