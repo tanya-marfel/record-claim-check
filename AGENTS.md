@@ -29,11 +29,31 @@ When creating commits, use the Conventional Commits format:
 - After completing a requested change and passing the required checks, create a Conventional Commit containing only that task's changes, unless the user explicitly asks to leave them uncommitted. Do not wait for a separate request to commit.
 - Stage specific files or hunks and inspect the staged diff before committing. Preserve unrelated changes, including changes already staged by the user.
 - If required checks fail or cannot run, report the blocker and leave the changes uncommitted rather than bypassing checks. Documentation-only changes require the checks described below, not a full build.
-- Report the commit hash and validation results in the handoff. Push only when explicitly requested.
+- Report the commit hash and validation results in the handoff. Push and open or update the pull request as described under Pull requests.
 
 ## Pull requests
 
-- When asked to create or update a pull request, read `.github/pull_request_template.md` and use its headings for the description. Fill each section with actual details and remove the instructional comments.
+### Open and update pull requests automatically
+
+- A branch is ready for a pull request when the task's changes are committed as Conventional Commits, the checks required for those changes have passed (`git diff --check` for documentation-only changes), and no uncommitted changes from the task remain. When a branch is ready, push it and create the pull request without waiting for a separate request. Open it ready for review, not as a draft, unless the user asks for a draft.
+- If the user says not to push, to leave the work uncommitted, or to hold the pull request, follow that instead.
+- Never push to, or open a pull request from, `main` or the default branch. If the work is on the default branch, move it to a new branch named for the change before pushing.
+- Push only the current branch with a normal push. Never force-push unless the user explicitly asks. Set the upstream on the first push.
+- Push only commits that belong to the task. If the branch contains unrelated commits or changes the user has not asked to publish, report that and do not push.
+- Before pushing, inspect the commits being pushed for credentials, tokens, signed URLs, record payloads, and generated output, following the security rules below. Do not push if any are present.
+- The base is the repository's default branch unless the user names another. Before creating a pull request, check whether one already exists for the branch (`gh pr list --head <branch> --state all`). Update the existing one instead of opening a second.
+- If the GitHub CLI is missing or not authenticated, do not work around it with another tool or by editing git configuration. Still push the branch, then give the user the title, the body, and the compare URL, and say that the pull request was not created.
+- Keep the pull request description in step with the branch. Whenever new commits are added to a branch that has an open pull request, after the checks for them pass, push and then update the description in the same turn:
+  - Re-inspect the complete branch diff against the base and rewrite Summary, Validation, and Compatibility and operations so they describe the final change, not only the latest commit.
+  - Replace Validation with the commands run for the current head and their observed results. Do not leave results from an earlier head in place.
+  - Update the title if the scope of the change has changed.
+  - Preserve human-authored content: text the user or reviewers added, their links, and any closing keywords the user set.
+  - Update the body with `gh pr edit <number> --body-file <file>` (and `--title` if needed), then inspect the saved title, body, base branch, and head branch.
+- Include the pull request URL in the handoff, together with the commit hashes and validation results.
+
+### Description and content
+
+- Whenever a pull request is created or updated, whether automatically or on request, read `.github/pull_request_template.md` and use its headings for the description. Fill each section with actual details and remove the instructional comments.
 - Inspect the complete branch diff against the intended PR base and the commits included in the PR. Describe the final change, not just the most recent commit or the conversation history. Do not describe uncommitted changes as part of the PR.
 - Use a Conventional Commit title that describes the final scope. Keep the summary concise and explain the problem and resulting behavior before implementation details.
 - Populate Validation with the commands actually run and their observed results for the proposed changes. Distinguish passing tests from skipped tasks or `NO-SOURCE`, and disclose checks that were not run and why. Do not invent coverage or reuse stale validation results.
