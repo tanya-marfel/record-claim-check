@@ -29,3 +29,7 @@ Storage is chosen per topic. Add a `StorageResolver` that returns a target from 
 The factory still creates the shared components once and closes them. Create the store for a target on first use, keep stores in a size-bounded cache, and close evicted ones. `FilterFactory.close` closes every store and credentials provider. When a reload removes a mapping, close its store after in-flight operations finish.
 
 The default credential chain is used only to assume mapping roles ([ADR 0009](0009-assume-one-role-per-storage-mapping.md)). The in-memory store used in tests keys objects by bucket and object key, so tests can cover more than one target.
+
+## Amendment 2026-11-08
+
+`ObjectStore` is a plugin interface, selected and configured in the filter configuration ([ADR 0010](0010-pluggable-mapping-source-and-object-store.md)). The S3 implementation and the in-memory test implementation are the two that this project ships. Store failures are reported as a fixed set of outcomes that the filter maps to error codes.
