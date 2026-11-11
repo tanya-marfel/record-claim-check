@@ -2,7 +2,7 @@
 kroxylicious = "0.25.0"
 kafka = "4.3.1"
 awssdk = "2.33.0"
-junit = "6.0.1"
+junit = "6.1.3"
 
 [libraries]
 kroxylicious-bom = { module = "io.kroxylicious:kroxylicious-bom", version.ref = "kroxylicious" }
