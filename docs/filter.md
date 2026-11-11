@@ -200,6 +200,25 @@ Resolve storage from the mapping snapshot. Create stores and credentials provide
 
 Log topic, partition, value size, and a short digest prefix. Do not log payloads, full object keys, URLs, credentials, or authorization headers.
 
+## Filter order
+
+Kroxylicious passes requests through `defaultFilters` (or a virtual cluster's `filters`) in list order and passes responses through in reverse order ([Proxy Guide, Filter chain](https://kroxylicious.io/documentation/0.25.0/html/kroxylicious-proxy/)). The order of `filterDefinitions` does not matter.
+
+Place the claim-check filter last, after any filter that validates or transforms record values:
+
+```yaml
+defaultFilters:
+  - validation
+  - encryption
+  - claim-check
+```
+
+- **Validation before claim check.** On produce, the claim-check filter replaces the value with an envelope. A filter placed after it sees the envelope, not the payload, so it validates or transforms the wrong bytes.
+- **Encryption before claim check.** On produce, the value is encrypted first and the ciphertext is offloaded, so the bucket never holds plaintext. If claim-check runs first, the bucket holds plaintext and the encryption filter encrypts only the envelope. On fetch the reverse order applies automatically: the claim-check filter restores the ciphertext, then the encryption filter decrypts it.
+- The threshold and `maxValueBytes` apply to the value as the claim-check filter sees it, which is the ciphertext when encryption runs before it.
+
+Broker-side checks see the envelope too. A topic with broker-side schema validation, such as Confluent Schema Validation, rejects the envelope. Do not map such a topic.
+
 ## Operator notes
 
 The proxy's own role needs `sts:AssumeRole` and nothing on team buckets. Limit it to roles under a dedicated path:
