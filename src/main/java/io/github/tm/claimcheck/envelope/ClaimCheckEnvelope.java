@@ -7,7 +7,6 @@
 
 package io.github.tm.claimcheck.envelope;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;

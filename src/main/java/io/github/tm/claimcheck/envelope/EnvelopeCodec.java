@@ -19,8 +19,8 @@ public class EnvelopeCodec {
     private static final byte[] MAGIC = {'K', 'R', 'C', '1'};
     private static final byte VERSION = 1;
     private static final int HEADER_SIZE = 4 + 1 + 8 + 32 + 1;
-    protected static final int DIGEST_SIZE = 32;
-    protected static final int MAX_STORAGE_ID_LENGTH = 253;
+    static final int DIGEST_SIZE = 32;
+    static final int MAX_STORAGE_ID_LENGTH = 253;
 
     public byte[] encode(ClaimCheckEnvelope envelope) {
         byte[] storageId = envelope.storageId().getBytes(StandardCharsets.UTF_8);
@@ -59,8 +59,8 @@ public class EnvelopeCodec {
         return Optional.of(new ClaimCheckEnvelope(size, digest, storageId));
     }
 
-    private String readStorageId(int keyLength, ByteBuffer buf) {
-        var storageIdBytes = new byte[keyLength];                  // safe: keyLength == bytes left
+    private String readStorageId(int storageIdLength, ByteBuffer buf) {
+        var storageIdBytes = new byte[storageIdLength];            // safe: storageIdLength == bytes left
         buf.get(storageIdBytes);
 
         try {
@@ -75,11 +75,11 @@ public class EnvelopeCodec {
     }
 
     private int readStorageIdLength(ByteBuffer buf) {
-        int keyLength = buf.get() & 0xFF;      // unsigned
-        if (keyLength == 0 || keyLength > MAX_STORAGE_ID_LENGTH || keyLength != buf.remaining()) {
+        int storageIdLength = buf.get() & 0xFF;      // unsigned
+        if (storageIdLength == 0 || storageIdLength > MAX_STORAGE_ID_LENGTH || storageIdLength != buf.remaining()) {
             throw new InvalidEnvelopeException("invalid storage id length");
         }
-        return keyLength;
+        return storageIdLength;
     }
 
     private static boolean startsWithMagic(byte[] value) {
